@@ -83,3 +83,9 @@ class MonthlySalary(models.Model):
 
     def __str__(self):
         return f'{self.employee} - {self.month_year.month}/{self.month_year.year}'
+
+
+class RequestStatistics(models.Model):
+    user = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    requests_count = models.IntegerField()
+    exceptions_count = models.IntegerField()
