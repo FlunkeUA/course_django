@@ -228,6 +228,6 @@ SIMPLE_JWT = {
 CELERY_BEAT_SCHEDULE = {
     'send_daily_report': {
         'task': 'hr.tasks.send_daily_report',
-        'schedule': crontab(hour=8, minute=0, day_of_week='*'),
+        'schedule': 10.0,
     },
 }

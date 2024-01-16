@@ -76,3 +76,20 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: Denis@ukr.net
+      PGADMIN_DEFAULT_PASSWORD: 123456789
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - course_django_network
+
+networks:
+    course_django_network:
+      external: true
