@@ -225,9 +225,12 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
 CELERY_BEAT_SCHEDULE = {
-    'send_daily_report': {
-        'task': 'hr.tasks.send_daily_report',
-        'schedule': 10.0,
+    'generate_user_activity_report': {
+        'task': 'hr.tasks.generate_user_activity_report',
+        'schedule': crontab(hour=8, minute=0),
     },
 }

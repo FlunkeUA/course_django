@@ -1,8 +1,12 @@
 from celery import shared_task
 from django.core.mail import send_mail
+
+from accounts import models
 from hr.models import Employee, RequestStatistics
 from django.utils import timezone
 from datetime import timedelta
+
+from django.contrib.auth.models import User
 
 
 @shared_task
@@ -24,21 +28,18 @@ def send_password_reset_emails():
 
 @shared_task
 def send_daily_report():
-    statistics = RequestStatistics.objects.all()
-
-    report_body = "Звіт про кількість запитів та винятків за вчорашній день:\n\n"
-    for stat in statistics:
-        report_body += f"Користувач: {stat.user.username}\n"
-        report_body += f"Кількість запитів: {stat.requests_count}\n"
-        report_body += f"Кількість винятків: {stat.exceptions_count}\n\n"
-
-    admins = Employee.objects.filter(is_admin=True)
-
-    subject = "Щоденний звіт про кількість запитів та винятків"
-    send_mail(
-        subject,
-        report_body,
-        'from@example.com',
-        [admin.email for admin in admins],
-        fail_silently=False,
+    user_statistics = RequestStatistics.objects.values('user__username').annotate(
+        request_count=models.Count('id'),
+        exception_count=models.Sum(models.F('has_exception'))
     )
+
+    report = "User Activity Report:\n\n"
+    for user_stat in user_statistics:
+        report += f"User: {user_stat['user__username']}, Requests: {user_stat['request_count']}, Exceptions: {user_stat['exception_count']}\n"
+
+    subject = 'Daily User Activity Report'
+    message = report
+    from_email = 'your_email@example.com'
+    admin_emails = [admin.email for admin in User.objects.filter(is_superuser=True)]
+
+    send_mail(subject, message, from_email, admin_emails)
